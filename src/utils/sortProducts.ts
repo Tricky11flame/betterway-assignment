@@ -1,6 +1,6 @@
 import {type ProductId ,type ProductMap } from "../models/productType";
 export const sortProducts = (
-    ids:ProductId, 
+    ids:ProductId[], 
     data:ProductMap, 
     sortType:boolean
     ) : ProductId[] => {

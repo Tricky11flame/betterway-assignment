@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { getCartFromStorage, saveCartToStorage } from '../utils/storage';
+import { getCartFromStorage, getProductsFromStorage, saveCartToStorage } from '../utils/storage';
 import { updateCartQuantity, generateBill } from '../utils/cartUtils';
 import type { ProductMap,ProductId } from '../models/productType';
 import type { CartState } from '../models/cartType';
 
-export const useCart = (productData: ProductMap) => {
+export const useCart = () => {
+    const productData: ProductMap = getProductsFromStorage()
     const [cart, setCart] = useState<CartState>(() => getCartFromStorage());
     useEffect(() => {
         saveCartToStorage(cart);
