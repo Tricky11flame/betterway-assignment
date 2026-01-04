@@ -7,6 +7,7 @@ import "../index.css";
 const Cart = () => {
   const [productData] = useState<ProductMap>(() => getProductsFromStorage());
   const [cart, setCart] = useState<CartState>(() => getCartFromStorage());
+  const [isSuccess, setIsSuccess] = useState(false);
   useEffect(() => {
     saveCartToStorage(cart);
   }, [cart]);
@@ -24,6 +25,23 @@ const Cart = () => {
       </div>
     );
   }
+  
+const handleCheckout = () => {
+  setCart({});
+  saveCartToStorage({});
+  setIsSuccess(true);
+};
+
+if (isSuccess) {
+  return (
+    <div className="empty-view">
+      <div className="success-icon">✅</div>
+      <h2>Order Placed!</h2>
+      <p>Thank you for your purchase.</p>
+      <button onClick={() => window.location.href = "/home"}>Continue Shopping</button>
+    </div>
+  );
+}
 
   return (
     <div className="cart-container">
@@ -65,7 +83,12 @@ const Cart = () => {
           <span>Total</span>
           <span>${bill.totalCost.toFixed(2)}</span>
         </div>
-        <button className="checkout-cta">Proceed to Checkout</button>
+        <button 
+          className="checkout-cta" 
+          onClick={handleCheckout}
+        >
+          Proceed to Checkout
+        </button>
       </aside>
     </div>
   );

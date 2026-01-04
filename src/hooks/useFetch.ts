@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { ProductMap } from '../models/productType';
-import { saveProductsToStorage } from '../utils/storage';
+import { saveProductsToStorage, getProductsFromStorage } from '../utils/storage';
 
 export const useFetchProducts = () => {
   const [products, setProducts] = useState<ProductMap>({});
@@ -8,9 +8,20 @@ export const useFetchProducts = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
+        
+        // 1. Check Local Storage first
+        const storedData = getProductsFromStorage();
+        
+        if (storedData && Object.keys(storedData).length > 0) {
+          setProducts(storedData);
+          setLoading(false);
+          return; // Exit if data exists
+        }
+
+        // 2. Fetch if storage is empty
         const response = await fetch('https://dummyjson.com/products');
         if (!response.ok) throw new Error('Failed to fetch data');
         const json = await response.json();
@@ -18,29 +29,26 @@ export const useFetchProducts = () => {
         const sanitizedData: ProductMap = {};
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         json.products.forEach((item: any) => {
-        sanitizedData[item.id.toString()] = {
+          sanitizedData[item.id.toString()] = {
             productName: item.title,
             price: item.price,
             category: item.category,
             stock: item.stock,
             addedToCart: 0
-        };
+          };
         });
 
-setProducts(sanitizedData);
+        setProducts(sanitizedData);
+        saveProductsToStorage(sanitizedData);
       } catch (err) {
-        if(err instanceof Error){
-            setError(err.message);
-        }
-        else{
-            setError("unknown !!")
-        }
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    loadData();
   }, []);
-  saveProductsToStorage(products);
+
   return { products, loading, error };
 };
